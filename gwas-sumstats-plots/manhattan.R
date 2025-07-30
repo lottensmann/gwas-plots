@@ -34,7 +34,7 @@
 #   - Significance threshold set at logP > 7.30103 (P < 5e-8)
 #   - logP values capped at 100 for visualization
 #   - Known lead variants are colored orange, novel variants are colored red
-#   - Lead and novel variants are annotated by gene name
+#   - Lead and novel variants are annotated by variant identifier and gene name
 #
 # =============================================================================
 
@@ -65,14 +65,28 @@ notsig.dat <- gwas %>%
   slice_sample(prop = 0.2)
 gwas.dat <- bind_rows(sig.dat, notsig.dat)
 
-#cumulative position for x-axis of manhattan plot
-gwas.dat <- gwas.dat %>%
-  arrange(CHROM, Pos) %>%
-  group_by(CHROM) %>%
-  mutate(BPcum = Pos + lag(cumsum(max(Pos)), default = 0)) %>%
-  ungroup()
 
-# position of axis labels
+# Obtain cumulative position for x-axis of manhattan plot
+
+# Reorder file by chromosome and position
+gwas.dat <- gwas.dat %>% 
+  arrange(CHROM, Pos)
+
+# Compute max position per chromosome
+chr_sizes <- gwas.dat %>% 
+  group_by(CHROM) %>%
+  summarize(chr_len = max(Pos), .groups = "drop")
+
+# Add cumulative offset
+chr_sizes <- chr_sizes %>%
+  mutate(offset = lag(cumsum(as.numeric(chr_len)), default = 0))
+
+# Add offsets to data and compute cumulative position
+gwas.dat <- gwas.dat %>%
+  left_join(chr_sizes, by = "CHROM") %>%
+  mutate(BPcum = Pos + offset)
+
+# Obtain position of chromosome numbers on x-axis
 axis.set <- gwas.dat %>%
   group_by(CHROM) %>%
   summarise(center = mean(range(BPcum)), .groups = "drop")
@@ -94,7 +108,7 @@ gwas.dat <- gwas.dat %>%
   )
 
 
-# create and save the plot as pdf, horizontal line at genome-wide significance threshold
+# Create and save the plot as pdf
 options(bitmapType = 'cairo')
 
 plot <- ggplot(gwas.dat, aes(x = BPcum, y = logP,
