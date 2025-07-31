@@ -18,10 +18,10 @@ suppressPackageStartupMessages({
 })
 
 #Read in fine-mapping results with regional heritability
-finemap=read.delim("/Users/ottensma/Documents/second_paper/lipidome_disease/files/finemap_regh2.txt",header = T,sep = "\t",stringsAsFactors  = F)
+finemap=read.delim("finemap_regh2.txt",header = T,sep = "\t",stringsAsFactors  = F)
 
 #Define high-impact loci as those with regional heritability > 2%
-high_impact_loci=unique(finemap_uv_comb[which(finemap_uv_comb$h2g>0.02),]$locus) 
+high_impact_loci=unique(finemap[which(finemap$h2g>0.02),]$locus) 
 
 #Label loci not among high-impact loci as other loci and create factor variable
 finemap <- finemap %>%
