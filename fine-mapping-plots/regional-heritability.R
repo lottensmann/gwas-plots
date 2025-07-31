@@ -4,7 +4,8 @@
 # Description:
 #   Creates a stacked barplot of regional heritability (h²) per trait, 
 #   high-impact loci (h² > 2%) are colored and the plot is faceted by trait groups.
-#
+# Input:
+#  finemap_regh2.txt: file with regional heritability estimates of traits obtained from FINEMAP
 # Output:
 #   reg_h2_stacked.png
 # =============================================================================
@@ -17,7 +18,8 @@ suppressPackageStartupMessages({
   library(dplyr)
 })
 
-#Read in fine-mapping results with regional heritability
+#Read in tab-seperated fine-mapping results file with regional heritability estimates (h2g)
+#Required columns: trait locus group h2g
 finemap=read.delim("finemap_regh2.txt",header = T,sep = "\t",stringsAsFactors  = F)
 
 #Define high-impact loci as those with regional heritability > 2%
